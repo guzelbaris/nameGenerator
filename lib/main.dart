@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         title: 'Namer App',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.cyanAccent),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrangeAccent),
         ),
         home: MyHomePage(),
       ),
@@ -26,10 +26,21 @@ class MyApp extends StatelessWidget {
 }
 
 class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+  WordPair current = WordPair.random();
 
   void getNext() {
     current = WordPair.random();
+    notifyListeners();
+  }
+
+  List<WordPair> favorites = <WordPair>[];
+
+  void toggleFavorite() {
+    if (favorites.contains(current)) {
+      favorites.remove(current);
+    } else {
+      favorites.add(current);
+    }
     notifyListeners();
   }
 }
@@ -39,19 +50,39 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();  
     var pair = appState.current;                 
-
+  IconData icon;
+    if (appState.favorites.contains(pair)) {
+      icon = Icons.favorite;
+    } else {
+      icon = Icons.favorite_border;
+    }
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('A random name idea:'),
-            BigCard(pair: pair),               
-            ElevatedButton(
-              onPressed: () {
-                appState.getNext();
-              },
-              child: Text('Next'),
+            BigCard(pair: pair),
+            SizedBox(height: 10),               
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    appState.toggleFavorite();
+                  },
+                  
+                  label: Text('Like'),
+                  icon: Icon( icon),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    appState.getNext();
+                  },
+                  child: Text('Generate'),
+                ),
+                
+              ],
             ),
           ],
         ),
